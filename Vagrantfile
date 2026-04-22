@@ -10,6 +10,7 @@ Vagrant.configure('2') do |config|
 
   config.vm.network 'private_network', type: 'dhcp'
   config.vm.synced_folder '.', '/vagrant', disable: true
+  config.vm.synced_folder '.', '/vagrant', type: 'rsync', disabled: true
 
   config.vm.provider :libvirt do |libvirt|
     libvirt.memory = '8192'
@@ -18,6 +19,8 @@ Vagrant.configure('2') do |config|
     libvirt.storage_pool_name = 'default'
     libvirt.qemu_use_session = false
     libvirt.keymap = 'en-us'
+    libvirt.graphics_type = 'vnc'
+    libvirt.video_type = 'vga'
   end
 
   config.vm.provider 'virtualbox' do |vb|
@@ -38,12 +41,12 @@ Vagrant.configure('2') do |config|
 
   config.vm.provision 'shell', inline: <<-POWERSHELL
     powershell.exe -ExecutionPolicy Bypass -Command "winget settings --enable BypassCertificatePinningForMicrosoftStore"
+    powershell.exe -ExecutionPolicy Bypass -Command "winget install --id Git.Git -e --source winget"
+    powershell.exe -ExecutionPolicy Bypass -Command "winget install --id MSYS2.MSYS2 -e --source winget"
     powershell.exe -ExecutionPolicy Bypass -Command "winget install --id Rustlang.Rustup --accept-source-agreements -e --source winget"
     powershell.exe -ExecutionPolicy Bypass -Command "rustup toolchain install nightly-x86_64-pc-windows-gnu"
     powershell.exe -ExecutionPolicy Bypass -Command "rustup default nightly-x86_64-pc-windows-gnu"
-    powershell.exe -ExecutionPolicy Bypass -Command "winget install --id Git.Git -e --source winget"
-    powershell.exe -ExecutionPolicy Bypass -Command "winget install --id MSYS2.MSYS2 -e --source winget"
-    C:/msys64/usr/bin/bash -lc "pacman -S mingw-w64-x86_64-toolchain --needed --noconfirm"
     powershell.exe -ExecutionPolicy Bypass -Command "git clone https://github.com/MikeHorn-git/Undine.git"
+    C:/msys64/usr/bin/bash -lc "pacman -S mingw-w64-x86_64-toolchain --needed --noconfirm"
   POWERSHELL
 end
